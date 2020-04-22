@@ -1,4 +1,3 @@
-# Git repo metadata
 TAG = $(shell git describe --tags --always)
 # TODO: if your docher hub account name is different then this on github ovrwrite this this variable with docer hub accout name
 PREFIX = $(shell git config --get remote.origin.url | tr ':.' '/'  | rev | cut -d '/' -f 3 | rev)
@@ -29,7 +28,7 @@ all: push
 
 image:
   # TODO: this build command is incomplete, add last flag of this command that tags image as latest upon building it
-	docker build \
+	docker build . -t "$(PREFIX)/$(REPO_NAME)" \
 		--build-arg SCHEMA_NAME="$(SCHEMA_NAME)" \
 		--build-arg SCHEMA_DESCRIPTION="$(SCHEMA_DESCRIPTION)" \
 		--build-arg SCHEMA_URL="$(SCHEMA_URL)" \
@@ -39,11 +38,13 @@ image:
 		--build-arg SCHEMA_BUILD_DATE="$(SCHEMA_BUILD_DATE)" \
 		--build-arg SCHEMA_BUILD_VERSION="$(SCHEMA_BUILD_VERSION)" \
 		--build-arg SCHEMA_CMD="$(SCHEMA_CMD)" \
+  	&& docker tag "$(PREFIX)/$(REPO_NAME):latest" "$(PREFIX)/$(REPO_NAME):$(TAG)"
 	
   # TODO: last part of this command that tags just built image with a specyfic tag
 	
 push: image
-	# TODO: two commands, first pushes the latest image, second pushes the image tagged with specyfic tag
+	docker push "$(PREFIX)/$(REPO_NAME):latest"
+	docker push "$(PREFIX)/$(REPO_NAME):$(TAG)"
 	
 clean:
 
